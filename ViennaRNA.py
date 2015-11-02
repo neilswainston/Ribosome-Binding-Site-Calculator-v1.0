@@ -1,4 +1,4 @@
-#Python wrapper for the Vienna RNA Package by Andreas R. Gruber, Ronny Lorenz, Stephan H. Bernhart, Richard Neuböck, and Ivo L. Hofacker (NAR, 2008).
+#Python wrapper for the Vienna RNA Package by Andreas R. Gruber, Ronny Lorenz, Stephan H. Bernhart, Richard Neubck, and Ivo L. Hofacker (NAR, 2008).
 
 #This file is part of the Ribosome Binding Site Calculator.
 
@@ -79,7 +79,7 @@ class ViennaRNA(dict):
         if outputPS:
             outputPS_str = " "
         else:
-            outputPS_str = " -noPS "
+            outputPS_str = " --noPS "
 
         #Call ViennaRNA C programs
         cmd = "RNAcofold"
@@ -146,7 +146,7 @@ class ViennaRNA(dict):
 
         #Call ViennaRNA C programs
         cmd = "RNAsubopt"
-        args = " -e " + str(energy_gap) + outputPS_str + dangles + " < " + self.prefix
+        args = " -e " + str(energy_gap) + " < " + self.prefix
 
         output = popen2.Popen3(cmd + args)
 
