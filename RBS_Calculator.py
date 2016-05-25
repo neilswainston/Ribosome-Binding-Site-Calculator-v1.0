@@ -6,7 +6,7 @@
 # The Ribosome Binding Site Calculator is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# (at your option) any later version.
 
 # The Ribosome Binding Site Calculator is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,7 +17,6 @@
 # along with Ribosome Binding Site Calculator.  If not, see <http://www.gnu.org/licenses/>.
 # Copyright 2008-2009 is owned by the University of California Regents.
 # All rights reserved.
-
 import math
 import re
 
@@ -755,11 +754,7 @@ class RBS_Calculator(NuPACK):
         self.Expression_list = []
 
         for (start_pos, codon) in self.find_start_codons(self.mRNA_input):
-
             try:
-
-                # print "Top of calc_dG here"
-
                 # Set dangles based on length between 5' end of mRNA and start
                 # codon
                 if self.auto_dangles:
@@ -772,7 +767,6 @@ class RBS_Calculator(NuPACK):
 
                 else:
                     self.dangles = self.dangles_default
-                    # print "Auto Dangles set to ", self.dangles
 
                 # Start codon energy
                 dG_start_codon = self.start_codon_energies[codon]
@@ -838,13 +832,6 @@ class RBS_Calculator(NuPACK):
                 self.Expression_list.append(
                     self.calc_expression_level(dG_total))
 
-                # For exporting the relevant structure to a PDF
-                #index = mRNA_rRNA_structure["MinStructureID"]
-                #mRNA_rRNA_structure.export_PDF(index, name = self.name + ": Before standby site", filename =  self.name + "_Before_Standby_rRNA.pdf", program = "subopt")
-
-                #index = corrected_structure["MinStructureID"]
-                #corrected_structure.export_PDF(index, name = self.name + ": After standby site", filename =  self.name + "_After_Standby_rRNA.pdf", program = "subopt")
-
             except CalcError, msg:
                 print msg
                 self.mRNA_structure_list.append([])
@@ -874,13 +861,10 @@ class RBS_Calculator(NuPACK):
 
     def calc_expression_level(self, dG):
 
-        import math
         return RBS_Calculator.K * math.exp(-dG / RBS_Calculator.RT_eff)
 
     def print_dG(self, max_dG=1e12, brief=0, return_string=False, print_expression=False):
         '''Print out useful information about the mRNA sequence'''
-
-        import math
 
         print_string = ""
         if self.run == 1:
@@ -972,8 +956,6 @@ class RBS_Calculator(NuPACK):
                         "----------------------------------------------------------------------------------------" + \
                         "\n"
 
-                # print "Computation Time: ", str(self.run_time), " seconds."
-
                 if return_string:
                     return print_string
         else:
@@ -993,8 +975,9 @@ class RBS_Calculator(NuPACK):
 
                 handle.writelines(parameters)
 
-            # Name, dG total, dG rRNA:mRNA, dG mRNA, dG spacing, dG standby, dG start codon, kinetic score, longest helix, longest loop, start position
-            #format = "%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n"
+            # Name, dG total, dG rRNA:mRNA, dG mRNA, dG spacing, dG standby, dG
+            # start codon, kinetic score, longest helix, longest loop, start
+            # position
             format = "%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n"
 
             for counter in range(len(self.start_position_list)):
@@ -1037,223 +1020,3 @@ class RBS_Calculator(NuPACK):
         else:
             raise RuntimeError(
                 "The RBS Calculator has not been run yet. Call the 'calc_dG' method.")
-
-#-------------------------------------------------------------------------
-# End RBS_Calculator class
-#-------------------------------------------------------------------------
-
-
-def calc_dG_from_file(handle, output, verbose=True, parameters={}):
-    from Bio import SeqIO
-    from RBS_Calculator import RBS_Calculator
-
-    records = SeqIO.parse(handle, "fasta")
-    First = True
-    export_PDF = True
-
-    # for i in range(30):
-    #    records.next()
-
-    for record in records:
-
-        mRNA = record.seq.tostring().upper()
-
-        # Set any defaults
-        start_range = [0, len(mRNA)]
-        name = record.description.split(" ")[0]
-
-        # Create instance of RBS Calculator
-        test = RBS_Calculator(mRNA, start_range, name)
-
-        # Examine kvars dictionary and pull out any options. Assign them to
-        # instanced class.
-        for (key, value) in parameters.items():
-
-            if key == "cutoff":
-                test.cutoff = value
-            elif key == "start_range":
-                test.start_range = value
-            elif key == "rRNA":
-                test.rRNA = value
-            elif key == "energy_cutoff":
-                test.energy_cutoff = value
-            elif key == "standby_site_length":
-                test.standby_site_length = value
-            elif key == "dangles":
-                test.dangles = value
-            elif key == "export_PDF":
-                export_PDF = value
-
-        test.calc_dG()
-        test.print_dG(test.infinity, print_expression=verbose)
-        test.save_data(output, First)
-
-        if First:
-            First = False
-
-        if export_PDF:
-            num_structs = len(test.mRNA_rRNA_uncorrected_structure_list)
-            for (structure, counter) in zip(test.mRNA_rRNA_uncorrected_structure_list, range(num_structs)):
-                index = structure["MinStructureID"]
-                structure.export_PDF(
-                    index, name, filename=name + "_rRNA" + "_" + str(counter) + ".pdf", program="subopt")
-
-            num_structs = len(test.mRNA_structure_list)
-            for (structure, counter) in zip(test.mRNA_structure_list, range(num_structs)):
-                structure.export_PDF(
-                    0, name, filename=name + "_mRNA" + "_" + str(counter) + ".pdf")
-
-    output.close()
-
-
-def calc_dG_pre_post_RBS(pre_list, post_list, RBS_list, name_list, output, verbose=True, parameters={}):
-
-    from RBS_Calculator import RBS_Calculator
-
-    First = True
-
-    for (pre, post, RBS, name) in zip(pre_list, post_list, RBS_list, name_list):
-
-        mRNA = pre + RBS + post
-
-        start_range = [0, len(mRNA)]
-
-        # Create instance of RBS Calculator
-        test = RBS_Calculator(mRNA, start_range, name)
-
-        # Examine kvars dictionary and pull out any options. Assign them to
-        # instanced class.
-        for (key, value) in parameters.items():
-
-            if key == "cutoff":
-                test.cutoff = value
-            elif key == "start_range":
-                test.start_range = value
-            elif key == "rRNA":
-                test.rRNA = value
-            elif key == "energy_cutoff":
-                test.energy_cutoff = value
-            elif key == "standby_site_length":
-                test.standby_sitRBSe_length = value
-            elif key == "dangles":
-                test.dangles = value
-            elif key == "export_PDF":
-                export_PDF = value
-
-        test.calc_dG()
-        if verbose:
-            test.print_dG(test.infinity)
-
-        test.save_data(output, First)
-        if First:
-            First = False
-
-    output.close()
-
-if __name__ == "__main__":
-
-    from Bio import SeqIO
-
-    #filename = "/common/RBS_Calculator/DataSets/Amin_RBSs.txt"
-    #filename = "/common/RBS_Calculator/DataSets/Forward_Predictions.txt"
-    #filename = "/common/RBS_Calculator/DataSets/Context_Tests_RBSs_2nd.txt"
-    #filename = "/common/RBS_Calculator/DataSets/DNA20_CDSs.fasta"
-    #output_filename = "/common/RBS_Calculator/Output_Forward_Predictions_dangles_all_TTC.txt"
-    #output_filename = "/common/RBS_Calculator/Output_Context_Tests_RBSs_test.txt"
-    filename = "/common/RBS_Calculator/DataSets/All_Tested_RBSs.txt"
-    #filename = "E:\RBS_Calculator\DataSets\All_Tested_RBSs.txt"
-    #filename = "/common/RBS_Calculator/DataSets/Testing_RBSs.txt"
-    #filename = "/common/RBS_Calculator/DataSets/Karsten_nif_RBSs.txt"
-    #filename = "/common/RBS_Calculator/Dan_RBS_silk_sequences.fasta"
-    #output_filename = "/common/RBS_Calculator/Output_All_Tested_RBSs_newspacing.txt"
-    #output_filename = "/common/RBS_Calculator/Output_DNA20_Designed_RBS_1.txt"
-    #output_filename = "/common/RBS_Calculator/Output_Context_Tests_RBSs_3.txt"
-    #output_filename = "/common/RBS_Calculator/Output_Karsten_nif_RBSs.txt"
-    #output_filename = "/common/RBS_Calculator/Amin_RBSs_Output.txt"
-
-    #filename = "/common/RBS_Calculator/DataSets/Crt_version_RBSs.txt"
-
-    #filename = "/common/RBS_Calculator/DataSets/Output_Crt_natural_RBSs.txt"
-    #filename = "/common/RBS_Calculator/DataSets/RBS_Spacing.txt"
-    #filename = "/common/RBS_Calculator/DataSets/Ethan_RBSs_all.txt"
-    #filename = "/common/RBS_Calculator/DataSets/Dan_sicP.fasta"
-    #filename = "/common/RBS_Calculator/DataSets/Natural_prg_org_operon.str"
-
-    #output_filename = "/common/RBS_Calculator/Dan_Output_silk_RBSs.txt"
-    #handle = open(filename,"rU")
-    #output = open(output_filename,"w")
-
-    #verbose = False
-
-    #pars = {"start_range":[18,71],"pre_window_length":0,"post_window_length":0,"export_PDF":False}
-    #calc_dG_from_file(handle, output, verbose,pars)
-    # handle.close()
-    # output.close()
-
-    window_list = range(10, 65)
-    for window in window_list:
-        print "Cutoff = ", window
-        output_filename = "/common/RBS_Calculator/DataSets/cutoff/Output_All_Tested_RBSs_cutoff_" + \
-            str(window) + ".txt"
-
-        handle = open(filename, "rU")
-        output = open(output_filename, "w")
-
-        verbose = True
-
-        pars = {"start_range": [18, 44], "export_PDF": False, "cutoff": window}
-        calc_dG_from_file(handle, output, verbose, pars)
-        handle.close()
-        output.close()
-
-    #pre = "ggggaattgtgagcggataacaattcccctctagaa"
-    #RBS = "GAGGAAGTTAGTAAGGAGGTCAGGCGA"
-
-    #pre_list = []
-    #RBS_list = []
-    #CDS_list = []
-    #name_list = []
-    # Get protein coding sequence
-    #records = SeqIO.parse(handle,"fasta")
-    # for record in records:
-        # CDS_list.append(record.seq.tostring().upper())
-        # pre_list.append(pre)
-        # RBS_list.append(RBS)
-        # name_list.append(record.description)
-
-    #calc_dG_pre_post_RBS(pre_list,CDS_list,RBS_list,name_list,output,verbose = True, parameters = pars)
-
-    #name = "Test"
-    #mRNA = "TTCTAGAGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCAAAGGCTCAGTATTCCCACTGAG"
-
-    #start_range = [0, len(mRNA)]
-    #test = RBS_Calculator(mRNA, start_range, name)
-    # test.calc_dG()
-    # test.print_dG(test.infinity)
-
-    ##test.post_window_length = 19
-    #test.auto_dangles = False
-    #test.default_dangles = "all"
-    #test.pre_window_length = 1000
-    #test.post_window_length = 20
-    #test.cutoff = 50
-    # test.calc_dG()
-    # test.print_dG(test.infinity)
-
-    # if export_PDF:
-        #num_structs = len(test.mRNA_rRNA_corrected_structure_list)
-        # for (structure,counter) in
-        # zip(test.mRNA_rRNA_corrected_structure_list,range(num_structs)):
-
-        #index = structure["MinStructureID"]
-        #structure.export_PDF(index, name, filename =  name + "_rRNA" + "_" + str(counter) + ".pdf", program = "energy")
-
-        # for (structure,counter) in
-        # zip(test.mRNA_rRNA_uncorrected_structure_list,range(num_structs)):
-
-        #index = structure["MinStructureID"]
-        #structure.export_PDF(index, name, filename =  name + "_rRNA_uncorrected" + "_" + str(counter) + ".pdf", program = "energy")
-
-        #num_structs = len(test.mRNA_structure_list)
-        # for (structure,counter) in zip(test.mRNA_structure_list,range(num_structs)):
-        #structure.export_PDF(0, name, filename = name + "_mRNA" + "_" + str(counter) + ".pdf")

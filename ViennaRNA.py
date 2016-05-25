@@ -7,7 +7,7 @@
 # The Ribosome Binding Site Calculator is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# (at your option) any later version.
 
 # The Ribosome Binding Site Calculator is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,7 +21,6 @@
 # This Python wrapper is written by Howard Salis. Copyright 2008-2009 is owned by the University of California Regents. All rights reserved. :)
 # Use at your own risk.
 
-import os
 import os.path
 import popen2
 import time
@@ -99,7 +98,6 @@ class ViennaRNA(dict):
         args = outputPS_str + dangles + " < " + self.prefix
 
         output = popen2.Popen3(cmd + args)
-        # output.tochild.write(input_string)
 
         while output.poll() < 0:
             try:
@@ -129,8 +127,6 @@ class ViennaRNA(dict):
         self["mfe_basepairing_y"] = [bp_y]
         self["mfe_energy"] = [energy]
         self["totalnt"] = strands
-
-        # print "Minimum free energy secondary structure has been calculated."
 
     def subopt(self, strands, energy_gap, Temp=37.0, dangles="all", outputPS=False):
 
@@ -207,9 +203,6 @@ class ViennaRNA(dict):
         self._cleanup()
         self["program"] = "subopt"
 
-        # print "Minimum free energy and suboptimal secondary structures have
-        # been calculated."
-
     def energy(self, strands, base_pairing_x, base_pairing_y, Temp=37.0, dangles="all"):
 
         self["energy_composition"] = strands
@@ -249,8 +242,6 @@ class ViennaRNA(dict):
                 time.sleep(0.001)
             except:
                 break
-
-        # if debug == 1: print output.fromchild.read()
 
         self["energy_energy"] = []
 
@@ -341,33 +332,3 @@ class ViennaRNA(dict):
         if os.path.exists(self.prefix):
             os.remove(self.prefix)
         return
-
-if __name__ == "__main__":
-
-    # ,"acctcctta"]
-    sequences = [
-        "AGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCAAAGGCTCAGTATTCCCACT"]
-    test = ViennaRNA(sequences, material="rna37")
-
-    test.mfe([1], Temp=37.0, dangles="all")
-
-    bp_x = test["mfe_basepairing_x"][0]
-    bp_y = test["mfe_basepairing_y"][0]
-    strands = test["totalnt"]
-    bracket_string = test.convert_numbered_pairs_to_bracket(
-        strands, bp_x, bp_y)
-    print bracket_string
-
-    (strands, bp_x, bp_y) = test.convert_bracket_to_numbered_pairs(
-        bracket_string)
-
-    print "Strands = ", strands
-    print "bp_x = ", bp_x
-    print "bp_y = ", bp_y
-
-    print test.energy(strands, bp_x, bp_y, dangles="all")
-    test.subopt(strands, 3.5, dangles="all")
-    print test
-
-#    print bracket_string
-#    print test.convert_numbered_pairs_to_bracket(strands,bp_x,bp_y)

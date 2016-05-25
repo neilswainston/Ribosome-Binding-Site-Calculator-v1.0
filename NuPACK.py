@@ -6,7 +6,7 @@
 # The Ribosome Binding Site Calculator is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# (at your option) any later version.
 
 # The Ribosome Binding Site Calculator is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,7 +20,6 @@
 # This Python wrapper is written by Howard Salis. Copyright 2008-2009 is owned by the University of California Regents. All rights reserved. :)
 # Use at your own risk.
 
-import os
 import os.path
 import popen2
 import random
@@ -49,7 +48,6 @@ class NuPACK(dict):
         self.ran = 0
 
         import re
-        import string
 
         exp = re.compile('[ATGCU]', re.IGNORECASE)
 
@@ -179,7 +177,6 @@ class NuPACK(dict):
         self._cleanup("mfe")
         self._cleanup("in")
         self["program"] = "mfe"
-        # print "Minimum free energy secondary structure has been calculated."
 
     def subopt(self, strands, energy_gap, Temp=37.0, multi=" -multi", pseudo="", degenerate="", dangles="some"):
 
@@ -325,8 +322,6 @@ class NuPACK(dict):
             except:
                 break
 
-        # if debug == 1: print output.fromchild.read()
-
         # Skip the comments of the text file
         line = output.fromchild.readline()
         words = line.split(" ")
@@ -380,8 +375,6 @@ class NuPACK(dict):
                 time.sleep(0.001)
             except:
                 break
-
-        # if debug == 1: print output.fromchild.read()
 
         # Skip the comments of the text file
         line = output.fromchild.readline()
@@ -850,8 +843,8 @@ class NuPACK(dict):
 
         # Header: <Total # nt> \t dG = <# mfe> kcal/mol \t <name of sequence>
         # The Rest:
-        #<nt num> \t <bp letter> \t <3' neighbor> \t <5' neighbor> \t <# of bp'ing, 0 if none> \t ...
-        #<strand-specific nt num> \t <3' neighbor if connected by helix> \t <5' neighbor if connected by helix>
+        # <nt num> \t <bp letter> \t <3' neighbor> \t <5' neighbor> \t <# of bp'ing, 0 if none> \t ...
+        # <strand-specific nt num> \t <3' neighbor if connected by helix> \t <5' neighbor if connected by helix>
 
         # Extract the data for the desired complex using complex_ID
         bp_x = self[data_x][complex_ID]
@@ -999,53 +992,3 @@ class NuPACK(dict):
 
         # Close the file. Done.
         handle.close()
-
-if __name__ == "__main__":
-
-    import re
-
-    #sequences = ["AAGATTAACTTAAAAGGAAGGCCCCCCATGCGATCAGCATCAGCACTACGACTACGCGA","acctcctta","ACGTTGGCCTTCC"]
-    sequences = ["AAGATTAACTTAAAAGGAAGGCCCCCCATGCGATCAGCATCAGCACTACGACTACGCGA"]
-
-    # Complexes
-    # Input: Max number of strands in a complex. Considers all possible combinations of strands, up to max #.
-    #'mfe': calculate mfe? 'ordered': consider ordered or unordered complexes?
-    # Other options available (see function)
-
-    AddComplexes = []
-    test = NuPACK(sequences, "rna1999")
-    test.complexes(3, mfe=1, ordered=1)
-
-    print test
-
-    strand_compositions = test["ordered_composition"]
-    num_complexes = len(strand_compositions)
-    num_strands = len(sequences)
-
-    for counter in range(num_complexes):
-        output = "Complex #" + str(counter + 1) + " composition: ("
-        for strand_id in strand_compositions[counter][0:num_strands - 1]:
-            output = output + str(strand_id) + ", "
-        output = output + \
-            str(strand_compositions[counter][num_strands - 1]) + ")"
-
-        output = output + \
-            "  dG (RT ln Q): " + \
-            str(test["ordered_energy"][counter]) + " kcal/mol"
-        output = output + "  # Permutations: " + \
-            str(test["ordered_permutations"][counter])
-        print output
-        test.export_PDF(counter, name="Complex #" + str(counter + 1),
-                        filename="Complex_" + str(counter) + ".pdf", program="ordered")
-
-    # Mfe
-    # Input: Number of each strand in complex.
-    # Options include RNA/DNA model, temperature, dangles, etc. (See function).
-    # Example: If there are 3 unique strands (1, 2, 3), then [1, 2, 3] is one
-    # of each strand and [1, 1, 2, 2, 3, 3] is two of each strand.
-
-    #test.mfe([1, 2], dangles = "all")
-    # num_complexes = test["mfe_NumStructs"]  #Number of degenerate complexes (same energy)
-    #dG_mfe = test["mfe_energy"]
-    # print "There are ", num_complexes, " configuration(s) with a minimum
-    # free energy of ", dG_mfe, " kcal/mol."

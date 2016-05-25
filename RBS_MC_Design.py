@@ -4,7 +4,7 @@
 # The Ribosome Binding Site Calculator is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
-#(at your option) any later version.
+# (at your option) any later version.
 
 # The Ribosome Binding Site Calculator is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -139,19 +139,11 @@ def calc_constraints(RBS, estimator):
 
     kinetic_score = estimator.kinetic_score_list[0]
     three_state_indicator = estimator.three_state_indicator_list[0]
-    #(helical_loop_list,bulge_loop_list,helical_start_ends,bulge_start_ends) = estimator.calc_longest_loop_bulge(estimator,True,True,RBS)
-
-    # print "KS = ", kinetic_score
-    # print "3-state = ", three_state_indicator
-    # print "max/min helical = ", max(helical_loop_list),
-    # min(helical_loop_list)
 
     if kinetic_score > max_kinetic_score:
         return True
     if three_state_indicator > max_three_state_indicator:
         return True
-    # if min(helical_loop_list) < min_helical_loop: return True
-    # if max(helical_loop_list) > max_helical_loop: return True
 
     return False
 
@@ -159,7 +151,6 @@ def calc_constraints(RBS, estimator):
 def RemoveStartCodons(sequence):
     """Removes any start codons from an input sequence."""
 
-    import random
     import re
 
     regexp_str = "|".join(RBS_Calculator.start_codons)
@@ -293,8 +284,6 @@ def MCmove_constrain_helical_loop(pre_seq, post_seq, RBS, estimator):
             loop_range = sets.Set(range(start_end[0] + 1, start_end[1]))
             change_range = list(RBS_range & loop_range)  # Intersection
 
-            # print "Loops in RBS: ", change_range
-
             if len(change_range) > 0:
                 pos = random.choice(change_range) - len(pre_seq)
                 # Delete nucleotide at position pos
@@ -313,8 +302,6 @@ def MCmove_constrain_helical_loop(pre_seq, post_seq, RBS, estimator):
                 pos = random.choice(change_range) - len(pre_seq)
                 letter = random.choice(['A', 'T', 'C', 'G'])
                 RBS = RBS[0:pos] + letter + RBS[pos + 1:len(RBS) + 1]
-
-    #estimator = Run_RBS_Calculator(r_rna, pre_seq,post_seq,RBS,verbose=False)
 
     return RBS
 
@@ -611,18 +598,3 @@ def MC_Design_from_file(handle, output, dG_target, verbose=True, **kvars):
 
         estimator.mRNA_structure_list[0].export_PDF(
             0, "Monte Carlo Result", "MC_" + str(counter / 2 - 1) + "_mRNA" + ".pdf")
-
-#-------------------------------------------------------------------------
-if __name__ == "__main__":
-
-    pre_RBS = "TTCTAGA"
-    post_RBS = "ATGCAGCACGTGTGCAGCACTACAGCGTGTGACGACTACAGCATTCACGACAGTCACATGCAGTTGACAC"
-    dG_target = -10.0
-
-    (dG_total, RBS, estimator, iterations) = Monte_Carlo_Design(pre_RBS,
-                                                                post_RBS, RBS_init=None, dG_target=dG_target, MaxIter=10000, verbose=True)
-
-    print "Finished"
-    print "dG_total = ", dG_total
-    print "RBS = ", RBS
-    print "# iterations = ", iterations
