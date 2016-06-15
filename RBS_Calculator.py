@@ -1020,3 +1020,10 @@ class RBS_Calculator(NuPACK):
         else:
             raise RuntimeError(
                 "The RBS Calculator has not been run yet. Call the 'calc_dG' method.")
+
+if __name__ == "__main__":
+    mRNA = "TTCTAGAGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCAAAGGCTCAGTATTCCCACTGAG"
+    start_range = [0, len(mRNA)]
+    test = RBS_Calculator(mRNA, start_range, rRNA='acctcctta')
+    test.calc_dG()
+    test.print_dG()
