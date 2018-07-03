@@ -21,6 +21,7 @@ import math
 import re
 
 from NuPACK import NuPACK
+from ViennaRNA import ViennaRNA
 
 
 class CalcError(Exception):
@@ -33,7 +34,7 @@ class CalcError(Exception):
         return repr(self.value)
 
 
-class RBS_Calculator(NuPACK):
+class RBS_Calculator(ViennaRNA):
 
     # From experimental characterization of ALL Predicted RBSs as of 1/20/08
     RT_eff = 2.222
@@ -190,7 +191,7 @@ class RBS_Calculator(NuPACK):
 
         # print "After exception"
 
-        fold = NuPACK([mRNA, self.rRNA], material=self.RNA_model)
+        fold = ViennaRNA([mRNA, self.rRNA], material=self.RNA_model)
         fold.subopt(
             [1, 2], self.energy_cutoff, dangles=self.dangles, Temp=self.temp)
 
@@ -283,7 +284,7 @@ class RBS_Calculator(NuPACK):
 
         # Calculate pre-sequence folding
         if len(mRNA_pre) > 0:
-            fold_pre = NuPACK([mRNA_pre], material=self.RNA_model)
+            fold_pre = ViennaRNA([mRNA_pre], material=self.RNA_model)
             fold_pre.mfe([1], dangles=self.dangles, Temp=self.temp)
             bp_x_pre = fold_pre["mfe_basepairing_x"][0]
             bp_y_pre = fold_pre["mfe_basepairing_y"][0]
@@ -311,7 +312,7 @@ class RBS_Calculator(NuPACK):
 
         # Calculate post-sequence folding
         if len(mRNA_post) > 0:
-            fold_post = NuPACK([mRNA_post], material=self.RNA_model)
+            fold_post = ViennaRNA([mRNA_post], material=self.RNA_model)
             fold_post.mfe([1], dangles=self.dangles, Temp=self.temp)
             bp_x_post = fold_post["mfe_basepairing_x"][0]
             bp_y_post = fold_post["mfe_basepairing_y"][0]
@@ -325,7 +326,7 @@ class RBS_Calculator(NuPACK):
             total_bp_y.append(nt_y + offset)
 
         mRNA = self.mRNA_input[begin:mRNA_len]
-        fold = NuPACK([mRNA, self.rRNA], material=self.RNA_model)
+        fold = ViennaRNA([mRNA, self.rRNA], material=self.RNA_model)
 
         total_energy = fold.energy(
             [1, 2], total_bp_x, total_bp_y, Temp=self.temp, dangles=self.dangles)
@@ -389,7 +390,7 @@ class RBS_Calculator(NuPACK):
 
         # Fold it and extract the base pairings
         if (len(mRNA_subsequence)) > 0:
-            fold = NuPACK([mRNA_subsequence], material=self.RNA_model)
+            fold = ViennaRNA([mRNA_subsequence], material=self.RNA_model)
             fold.mfe([1], dangles=self.dangles, Temp=self.temp)
             energy_after_5p = fold["mfe_energy"][0]
             bp_x_5p = fold["mfe_basepairing_x"][0]  # [0] added 12/13/07
@@ -411,7 +412,7 @@ class RBS_Calculator(NuPACK):
             bp_y_after.append(nt_y)
 
         # Calculate its energy
-        fold = NuPACK([mRNA, self.rRNA], material=self.RNA_model)
+        fold = ViennaRNA([mRNA, self.rRNA], material=self.RNA_model)
         energy_after = fold.energy(
             [1, 2], bp_x_after, bp_y_after, dangles=self.dangles, Temp=self.temp)
 
@@ -435,7 +436,7 @@ class RBS_Calculator(NuPACK):
 
         mRNA = self.mRNA_input[max(
             0, start_pos - self.cutoff):min(len(self.mRNA_input), start_pos + self.cutoff)]
-        fold = NuPACK([mRNA], self.RNA_model)
+        fold = ViennaRNA([mRNA], self.RNA_model)
         fold.mfe([1], Temp=self.temp, dangles=self.dangles)
 
         structure = fold
@@ -451,7 +452,7 @@ class RBS_Calculator(NuPACK):
 
     def calc_dG_rRNA(self):
         """Calculates the dG of folding for the last 9 nt of the 16S rRNA. Not used in the free energy model."""
-        fold = NuPACK([self.rRNA], self.RNA_model)
+        fold = ViennaRNA([self.rRNA], self.RNA_model)
         fold.mfe([1], Temp=self.temp, dangles="all")
         dG_rRNA_folding = fold["mfe_energy"][0]
         return dG_rRNA_folding
@@ -479,11 +480,11 @@ class RBS_Calculator(NuPACK):
         pre_mRNA = mRNA[0:most_5p_mRNA]
         post_mRNA = mRNA[most_3p_mRNA + 1:len(mRNA) + 1]
 
-        pre_fold = NuPACK([pre_mRNA], material=self.RNA_model)
+        pre_fold = ViennaRNA([pre_mRNA], material=self.RNA_model)
         pre_fold.mfe([1], dangles=self.dangles, Temp=self.temp)
         dG_pre = pre_fold["mfe_energy"][0]
 
-        post_fold = NuPACK([post_mRNA], material=self.RNA_model)
+        post_fold = ViennaRNA([post_mRNA], material=self.RNA_model)
         post_fold.mfe([1], dangles=self.dangles, Temp=self.temp)
         dG_post = post_fold["mfe_energy"][0]
 
@@ -1020,6 +1021,7 @@ class RBS_Calculator(NuPACK):
         else:
             raise RuntimeError(
                 "The RBS Calculator has not been run yet. Call the 'calc_dG' method.")
+
 
 if __name__ == "__main__":
     mRNA = "TTCTAGAGGGGGGATCTCCCCCCAAAAAATAAGAGGTACACATGACTAAAACTTTCAAAGGCTCAGTATTCCCACTGAG"
