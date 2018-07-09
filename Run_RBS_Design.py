@@ -100,6 +100,7 @@ def ReadOutput(output):
 
     return (RBS_out, TIR_out, total_iterations)
 
+
 if __name__ == "__main__":
 
     # Runs RBS Design optimization

@@ -405,7 +405,7 @@ def Monte_Carlo_Design(r_rna, SD, pre_seq, post_seq, RBS_init=None, TIR_target=N
 
     # Define the energy/cost function based on the dG_target and the other,
     # optional targets
-    calc_energy = lambda (dG_total): abs(dG_total - dG_target)
+    def calc_energy((dG_total)): return abs(dG_total - dG_target)
 
     # If RBS_Init is given, use it. Otherwise, randomly choose one that is a
     # decent starting point.
